@@ -15,9 +15,9 @@ public class IdPBean {
         this.name = name;
         this.type = type;
         this.url = url;
-        if(acs == null){
+        if (acs == null) {
             this.acs = url;
-        }else{
+        } else {
             this.acs = acs;
         }
     }
