@@ -17,13 +17,16 @@
 <div id="okta-login-container"></div>
 
 <script type="text/javascript" th:inline="javascript">
-    var orgUrl = /*[[${idp.url}]]*/;
-    var redirectUrl = /*[[${idp.acs}]]*/;
-    var title = /*[[${idp.name}]]*/;
+    var orgUrl = [[${idp.url}]];
+    var redirectUrl = [[${idp.acs}]];
+    var title = [[${idp.name}]];
+    var logo = '/img/'+[[${idp.logo}]];
+    var username = [[${username}]];
 
     var oktaSignIn = new OktaSignIn({
         baseUrl: orgUrl,
-        logo: '/img/ice-logo.png',
+        logo: logo,
+        username: username,
         labels: {
             'primaryauth.title': title,
         },

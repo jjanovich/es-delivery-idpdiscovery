@@ -57,16 +57,17 @@ public class IdPConfiguration {
         private String logo;
         private String url;
         private String acs;
-        private List<String> mailDomain;
+        private String cidr;
+        private List<String> useridPattern;
 
         public ProviderConfiguration(String name, String type, String logo,
-                                     String url, String acs, List<String> mailDomain) {
+                                     String url, String acs, List<String> useridPattern) {
             this.name = name;
             this.type = type;
             this.logo = logo;
             this.url = url;
             this.acs = acs;
-            this.mailDomain = mailDomain;
+            this.useridPattern = useridPattern;
         }//ProviderConfiguration
 
         public ProviderConfiguration() {
@@ -114,12 +115,20 @@ public class IdPConfiguration {
             this.acs = acs;
         }
 
-        public List<String> getMailDomain() {
-            return mailDomain;
+        public String getCidr() {
+            return cidr;
         }
 
-        public void setMailDomain(List<String> mailDomain) {
-            this.mailDomain = mailDomain;
+        public void setCidr(String cidr) {
+            this.cidr = cidr;
+        }
+
+        public List<String> getUseridPattern() {
+            return useridPattern;
+        }
+
+        public void setUseridPattern(List<String> useridPattern) {
+            this.useridPattern = useridPattern;
         }
     }
 }

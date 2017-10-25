@@ -16,13 +16,21 @@
                         <div class="center-block">
                             <div class="jumbotron">
                                 <h2>Welcome to Okta Ice</h2>
-                                <p>Please submit your email:</p>
+                                <p>Please select your company:</p>
                                 <form role="form" action="/idp" method="post">
                                     <div class="form-group">
-                                        <label for="info">Email</label>
-                                        <input type="email" class="form-control" id="info" name="info" />
+                                        <div th:each="idp : ${idpConfig.idps}">
+                                            <button class="btn btn-light btn-lg btn-block" name="info" type="submit" id="info"  th:value="${idp.name}">
+                                                <div class="media">
+                                                    <img class="mr-3" th:src="'img/'+${idp.logo}" th:alt="${idp.name}"/>
+                                                    <div class="media-body">
+                                                        <p th:text="${idp.name}" class="align-middle"></p>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                            <p>&nbsp;</p>
+                                        </div>
                                     </div>
-                                    <button class="btn btn-default">Submit</button>
                                 </form>
                             </div>
                         </div>

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.ws.http.HTTPException;
+import java.security.InvalidParameterException;
 
 @Controller
 public class IdPDiscoveryController {
@@ -20,32 +22,34 @@ public class IdPDiscoveryController {
     }
 
     /**
-     * Controller for the index page.
-     * Based on what kind of strategy we are using, it will redirect to a different index page
-     *
-     * @return page that gathers user information for idp discovery
+     * Controller for the index page. This is where the app starts working
+     * Figures out what discovery strategy is being used and redirect user to the proper page
+     * @return page to capture information for idp discovery
      */
     @RequestMapping("/")
     public String welcome(ModelMap model, HttpServletRequest request) {
-        //TODO: test error page with arguments
-        String welcomePage = "error?errorMessage=\"Discovery Kind undefined\"";
+        String welcomePage = null;
+        //CHECK WHAT IDP STRATEGY I'M USING
         switch (idPConfigurationService.getStrategy()) {
-            case "MAIL":
-                welcomePage = "mail";
+            case "USERID": //REDIRECT TO THE USERID CAPTURE FORM
+                welcomePage = "userid";
                 break;
-            case "COMPANY":
+            case "COMPANY": //REDIRECT TO THE COMPANY CAPTURE FORM
                 welcomePage = "company";
+                model.put("idpConfig",idPConfigurationService);
                 break;
-            case "NETWORK":
-                //TODO: find a way to hum straight to findIDP
-                //this.findIdp(model, "", request);
+            case "NETWORK": //REDIRECT TO THE IP ADDRESS CAPTURE METHOD
+                welcomePage = this.findIdp(model, "", request);
                 break;
+            default:
+                throw new InvalidParameterException("Discovery kind undefined:"+ idPConfigurationService.getStrategy());
         }
+        //GO TO IDP DISCOVERY
         return welcomePage;
     }//welcome
 
     /**
-     * Discovers the correct IdP for Login based on the information collected
+     * Discovers the IdP based on the information collected
      * @param info
      * @return
      */
@@ -54,32 +58,33 @@ public class IdPDiscoveryController {
         String destination = null;
         IdPConfiguration.ProviderConfiguration idp = null;
 
-        //Find IDP, based on the strategy selected
+        //FIGURES OUT THE USER IDP
         switch (idPConfigurationService.getStrategy()) {
-            case "MAIL":
-                idp = idPConfigurationService.getProviderByMail(info);
+            case "USERID": //GET PROVIDER BY USERID
+                idp = idPConfigurationService.getProviderByUserId(info);
+                model.put("username",info);
                 break;
-            case "COMPANY":
+            case "COMPANY": //GET PROVIDER BY COMPANY NAME
                 idp = idPConfigurationService.getProviderByCompany(info);
                 break;
-            case "NETWORK":
+            case "NETWORK": //GET PROVIDER BY NETWORK
                 idp = idPConfigurationService.getProviderByNetwork(request);
                 break;
         }
 
-
-        //after finding the idp, defines the destination based on the IdP type
-        if (idp.getType().equalsIgnoreCase("okta")) {
-            //If idp type is okta, compile a custom sign-in widget
+        //REDIRECT USERS BASED ON THEIR IDP TYPE
+        if (idp.getType().equalsIgnoreCase("okta")) {//IDP TYPE = OKTA: COMPILE SIGN-IN WIDGET USING THE IDP INFORMATION
             model.put("idp", idp);
-            destination = "login";
-        } else if (idp.getType().equalsIgnoreCase("adfs")) {
-            //If idp type is adfs, redirect to ADFS for an IDP initiated Sign On
+            destination = "login";//THE LOGIN.HTML TEMPLATE GETS COMPILED
+        } else if (idp.getType().equalsIgnoreCase("adfs")) {//IDP TYPE = ADFS: REDIRECT USER TO ADFS IDP INITIATED SSO
             destination = "redirect:" + idp.getUrl() + "?loginToRp=" + idp.getAcs();
-        } else if (idp.getType().equalsIgnoreCase("saml")) {
-            //If idp type is saml, redirect to the IdP for a SAML standard IdP initiated Sign On
+        } else if (idp.getType().equalsIgnoreCase("saml")) {//IDP TYPE = SAML (E.G. ORACLE ACCESS MANAGER, TIVOLI AM, OR NOVELL): REDIRECT USER TO SAML PROVIDER IDP INITIATED SSO
             destination = "redirect:" + idp.getUrl() + "?redirecturl=" + idp.getAcs();
+        } else {
+            //IF NO IDP IS IDENTIFIED, JUST GO LOGIN. YOU CAN IMPLEMENT A HONEYPOT HERE ;)
+            destination = "login";
         }
+        //GO TO THE DESTINATION: OSW OR IDP INITIATED SSO
         return destination;
     }//findIdp
 }

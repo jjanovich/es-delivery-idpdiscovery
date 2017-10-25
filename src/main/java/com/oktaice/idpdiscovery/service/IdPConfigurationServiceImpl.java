@@ -2,9 +2,11 @@ package com.oktaice.idpdiscovery.service;
 
 import com.oktaice.idpdiscovery.config.IdPConfiguration;
 import org.apache.commons.net.util.SubnetUtils;
+import org.springframework.security.web.util.matcher.IpAddressMatcher;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Service
 public class IdPConfigurationServiceImpl implements IdPConfigurationService {
@@ -23,11 +25,19 @@ public class IdPConfigurationServiceImpl implements IdPConfigurationService {
     }
 
     @Override
-    public IdPConfiguration.ProviderConfiguration getProviderByMail(String email) {
-        String domain = email.substring(email.indexOf('@') + 1);
+    public List<IdPConfiguration.ProviderConfiguration> getIdps(){ return idPConfiguration.getIdps(); }
+
+    @Override
+    public IdPConfiguration.ProviderConfiguration getProviderByUserId(String userid) {
+        String domain = null;
+        if(userid.contains("@")){
+            domain = userid.substring(userid.indexOf('@') + 1);
+        }else{
+            domain = userid.substring(0, userid.indexOf('\\'));
+        }
         IdPConfiguration.ProviderConfiguration userIdP = null;
         for (IdPConfiguration.ProviderConfiguration ip : idPConfiguration.getIdps()) {
-            if (ip.getMailDomain().contains(domain)) {
+            if (ip.getUseridPattern().contains(domain)) {
                 userIdP = ip;
                 break;
             }
@@ -53,15 +63,20 @@ public class IdPConfigurationServiceImpl implements IdPConfigurationService {
         if (userIp == null || "".equals(userIp)) {
             userIp = request.getRemoteAddr();
         }
+        //TODO: If you want to overwrite the ip, this is the place
+        //userIp = "127.0.0.1";
         System.out.println("user ip address: "+userIp);
 
         IdPConfiguration.ProviderConfiguration userIdP = null;
         for (IdPConfiguration.ProviderConfiguration ip : idPConfiguration.getIdps()) {
-            if (new SubnetUtils(ip.getName()).getInfo().isInRange(userIp)) {
+            IpAddressMatcher matcher = new IpAddressMatcher(ip.getCidr());
+            if(matcher.matches(userIp)){
                 userIdP = ip;
                 break;
             }
         }
         return userIdP;
+
+
     }
 }

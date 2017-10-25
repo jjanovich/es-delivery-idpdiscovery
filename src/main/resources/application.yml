@@ -1,10 +1,39 @@
 ### GLOBAL SETTINGS
-### DISCOVERY STRATEGIES: FOR EXAMPLE: MAIL, NETWORK, COMPANY
-strategy: "MAIL"
-indexlogo: "ice.png"
-### LIST OF IDPs WITH SETTINGS
-### FOR CIDR, use http://phpfunk.com/uncategorized/cidr-notation-explained-simply/
-###           or http://www.subnet-calculator.com/cidr.php
+### DISCOVERY STRATEGIES: FOR EXAMPLE: USERID, NETWORK, COMPANY
+
+###### strategy: "USERID" ###################################################
+# DISCOVER THE IDP BY USERNAME
+# 1 - IDP DISCOVERY PRESENTS A PAGE WITH AN INPUT FOR THE USERNAME (userid.html)
+# 2 - USER SUBMITS HIS USERNAME
+# 3 - DISCOVERY CODE MATCHES THE USERID WITH THE useridPattern FOR EACH IDP (UNDER IDPS LIST) TO FIND A MATCH
+#############################################################################
+
+###### strategy: "COMPANY" ###################################################
+# DISCOVER THE IDP BY THE USER COMPANY
+# 1 - IDP DISCOVERY PRESENTS A PAGE WITH COMPANIES AVAILABLE FOR LOGIN (company.html)
+# 2 - USER SELECTS HIS COMPANY
+# 3 - DISCOVERY CODE MATCHES THE COMPANY WITH THE PROPER IDP (UNDER IDPS LIST) TO FIND A MATCH
+#############################################################################
+
+###### strategy: "CIDR" ###################################################
+# DISCOVER THE IDP BY THE USER IP
+# 1 - IDP DISCOVERY CAPTURES THE USER IP ADDRESS
+# 2 - DISCOVERY CODE MATCHES THE USER IP WITH THE NETWORK ROUTING (CIDR) FOR THE PROPER IDP (UNDER IDPS LIST) TO FIND A MATCH
+# PS: TO KNOW MORE ABOUT WHAT ARE CIDRs, CHECK:
+#      https://www.digitalocean.com/community/tutorials/understanding-ip-addresses-subnets-and-cidr-notation-for-networking
+#      http://www.subnet-calculator.com/cidr.php [IPv4]
+#      https://www.ultratools.com/tools/ipv6CIDRToRangeResult [IPv6]
+#############################################################################
+
+#############################################################################
+# AFTER THE IDP IS DISCOVERED, THE CODE REDIRECTS THE USER TO DIFFERENT PAGES DEPENDING ON HIS IDP TYPE:
+# IDP TYPES SUPPORTED:
+#    OKTA: DISCOVERY CODE PREPARES A CUSTOM LOGIN PAGE (login.html) USING THE SIGN-IN WIDGET LOGIC
+#    ADFS: DISCOVERY CODE REDIRECTS USER FOR AN IDP INITIATED LOGIN IN AD FS
+#    SAML: DISCOVERY CODE REDIRECTS USER FOR AN IDP INITIATED LOGIN IN IN THE SAML PROVIDER (E.G. ORACLE ACCESS MANAGER, IBM TIVOLI AM, OR NOVELL AM).
+#############################################################################
+
+strategy: "USERID"
 idps:
   -
     name: "Okta Central"
@@ -12,34 +41,35 @@ idps:
     logo: "central.png"
     url: "https://oktacentral.oktapreview.com"
     acs:
-    mailDomain:
+    useridPattern:
       - oktacentral.com
       - otkacentral.org
-    cidr: "192.168.0.0/24"
+    cidr: "::/0"
   -
     name: "Okta Ice"
     type: "okta"
     logo: "ice.png"
-    url: "https://oktaice.oktapreview.com"
+    url: "https://oktacdev035.oktapreview.com"
     acs: "https://oktacentral.oktapreview.com/sso/saml2/xpto"
-    mailDomain:
+    useridPattern:
       - oktaice.com
-    cidr: "192.168.2.0/24"
-  -
-    name: "Milk Producer Inc"
-    type: "adfs"
-    logo: "milk.png"
-    url: "https://adfs.milkproducer.com/adfs/ls/idpinitiatedsignon"
-    acs: "OktaIce"
-    mailDomain:
       - oktaice.local
+    cidr: "127.0.0.0/24"
+  -
+    name: "Ice Partner Inc"
+    type: "adfs"
+    logo: "partner.png"
+    url: "https://2012r2std.oktaice.local/adfs/ls/idpinitiatedsignon"
+    acs: "OktaIce"
+    useridPattern:
+      - OKTAICE
     cidr: "10.0.0.0/24"
   -
-    name: "Vanilla Rocks"
+    name: "Milk Producer Inc"
     type: "saml"
-    logo: "vanilla.png"
+    logo: "milk.png"
     url: "https://oracleoam.vanillarocks.com/oamfed/idp/initiatesso"
     acs: "https://oktacentral.oktapreview.com/sso/saml2/xpto"
-    mailDomain:
+    useridPattern:
       - vanilla.com
     cidr: "10.1.0.0/24"

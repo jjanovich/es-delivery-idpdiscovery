@@ -5,12 +5,5 @@
 }
 
 #okta-sign-in .okta-sign-in-header {
-  background-color: #FFFFEE;
-}
-#okta-sign-in .auth-content {
   background-color: #FF5C5C;
-  color: #FFFFFF;
-}
-#okta-sign-in .okta-form-title{
-  color: #FFFFFF;
 }
